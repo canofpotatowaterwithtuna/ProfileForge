@@ -1,6 +1,6 @@
-# profileforge
+# ProfileForge
 
-A new Flutter project.
+A portfolio-making app based on Flutter that lets you find and compare other users' portfolios.
 
 ## Android build
 
