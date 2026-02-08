@@ -1,15 +1,17 @@
-import 'package:google_generative_ai/google_generative_ai.dart';
+import 'package:firebase_ai/firebase_ai.dart';
 import '../../profile/data/portfolio_firestore_service.dart';
 
-/// Uses Gemini to match user descriptions to public portfolios.
+/// Uses Firebase AI Logic (Gemini) to match user descriptions to public portfolios.
+/// No API key needed—Firebase manages authentication.
 class AiDiscoveryService {
   AiDiscoveryService(this._model);
 
   final GenerativeModel _model;
 
-  /// [apiKey] from Firebase Console or Google AI Studio.
-  static AiDiscoveryService create({required String apiKey}) {
-    final model = GenerativeModel(model: 'gemini-1.5-flash', apiKey: apiKey);
+  /// Creates a service using Firebase AI Logic (Gemini Developer API).
+  static AiDiscoveryService create() {
+    final model =
+        FirebaseAI.googleAI().generativeModel(model: 'gemini-2.5-flash');
     return AiDiscoveryService(model);
   }
 
@@ -20,17 +22,23 @@ class AiDiscoveryService {
     int maxResults = 10,
   }) async {
     if (portfolios.isEmpty) return [];
-    if (description.trim().isEmpty) return List.generate(portfolios.length.clamp(0, maxResults), (i) => i);
+    if (description.trim().isEmpty) {
+      return List.generate(
+        portfolios.length.clamp(0, maxResults),
+        (i) => i,
+      );
+    }
 
     final summaries = portfolios.asMap().entries.map((e) {
       final p = e.value.profile;
       final skills = p.skills.map((s) => s.name).join(', ');
-      final exp = p.experience.map((x) => '${x.role} at ${x.company}').join('; ');
+      final exp =
+          p.experience.map((x) => '${x.role} at ${x.company}').join('; ');
       return '[${e.key}] ${p.fullName} | ${p.headline} | ${p.bio} | Skills: $skills | Experience: $exp';
     }).join('\n');
 
     const systemPrompt = '''
-You are a portfolio matching assistant. Given a list of portfolios (each prefixed with [index]) and a user's description of who they're looking for, return ONLY the indices of the best matching portfolios, comma-separated, in order of relevance. Return at most 10 indices. If none match well, return fewer. Be concise.
+You are a strict portfolio matching assistant. Given a list of portfolios (each prefixed with [index]) and a user's description of who they're looking for, return ONLY the indices of portfolios that GENUINELY match the user's request. The match must be clear and relevant—e.g. "painting professional" must match artists/painters, NOT software developers or unrelated fields. Return at most 10 indices. If NO portfolio genuinely matches the description, return exactly "none". Do not guess or include loosely related profiles. Be strict about relevance.
 ''';
 
     final prompt = '''
@@ -41,7 +49,7 @@ $summaries
 
 User is looking for: "$description"
 
-Return only the indices (e.g. 0,3,1,7) or "none" if no good matches.
+Return only the indices (e.g. 0,3,1,7) or "none" if no genuine matches.
 ''';
 
     try {

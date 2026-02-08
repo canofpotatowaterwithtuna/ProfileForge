@@ -46,7 +46,6 @@ class _ShimmerLoadingState extends State<ShimmerLoading> with SingleTickerProvid
     return AnimatedBuilder(
       animation: _animation,
       builder: (context, child) {
-        final t = (_animation.value.clamp(0.0, 1.0) - 0.5).abs() * 2;
         return ShaderMask(
           blendMode: BlendMode.srcATop,
           shaderCallback: (bounds) {

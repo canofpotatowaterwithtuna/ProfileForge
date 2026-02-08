@@ -53,15 +53,28 @@ class ExploreScreen extends ConsumerWidget {
           final docs = snap.data?.docs ?? [];
           if (docs.isEmpty) {
             return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.explore_outlined, size: 64, color: Theme.of(context).colorScheme.outline),
-                  const SizedBox(height: 24),
-                  Text('No portfolios yet', style: Theme.of(context).textTheme.titleLarge),
-                  const SizedBox(height: 8),
-                  Text('Be the first to publish your portfolio', style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
-                ],
+              child: Padding(
+                padding: const EdgeInsets.all(32),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.explore_outlined, size: 64, color: Theme.of(context).colorScheme.outline),
+                    const SizedBox(height: 24),
+                    Text('No portfolios yet', style: Theme.of(context).textTheme.titleLarge),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Be the first to publish and get discovered',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 24),
+                    FilledButton.icon(
+                      onPressed: () => context.push('/auth'),
+                      icon: const Icon(Icons.login, size: 18),
+                      label: const Text('Sign in to publish'),
+                    ),
+                  ],
+                ),
               ),
             );
           }

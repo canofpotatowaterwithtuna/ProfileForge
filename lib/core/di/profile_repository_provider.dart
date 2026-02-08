@@ -19,6 +19,7 @@ final profileRepositoryProvider = Provider<IProfileRepository>((ref) {
 });
 
 /// For tests: override with mock and optional initial profile.
+// ignore: inference_failure_on_function_return_type
 profileRepositoryMockOverride({UserProfile? initial}) =>
     profileRepositoryProvider.overrideWith(
       (ref) => ProfileRepositoryMockImpl(initial: initial),

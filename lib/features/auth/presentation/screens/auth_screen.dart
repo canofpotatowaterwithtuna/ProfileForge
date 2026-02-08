@@ -2,7 +2,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../data/auth_service.dart';
 import '../providers/auth_provider.dart';
 
 /// Login / Sign up screen. Uses email + password.
@@ -55,7 +54,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
         await auth.signInWithEmail(email, password);
       }
       if (!mounted) return;
-      context.go('/');
+      context.go('/');  // Router redirects to /account-type if first-time
     } on FirebaseAuthException catch (e) {
       setState(() => _error = e.message ?? 'Authentication failed');
     } catch (e) {
@@ -92,9 +91,18 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                         ),
                     textAlign: TextAlign.center,
                   ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Portfolios that stand out. Talent that gets found.',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      letterSpacing: 0.2,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
                   const SizedBox(height: 8),
                   Text(
-                    _isSignUp ? 'Create an account' : 'Sign in to publish & discover portfolios',
+                    _isSignUp ? 'Create an account' : 'Sign in to get started',
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                           color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),

@@ -1,6 +1,8 @@
 # ProfileForge
 
-A portfolio-making app based on Flutter that lets you find and compare other users' portfolios.
+A portfolio-making app that lets you create, publish, and discover talent—built with Flutter.
+
+**Prototype / kickstarter** – Core flows work end-to-end. Ready to extend into a full product.
 
 ## Features
 
@@ -10,8 +12,19 @@ A portfolio-making app based on Flutter that lets you find and compare other use
 - **Discover** – AI-style search: describe who you're looking for (e.g. "Flutter developer with backend experience") and get matching portfolios
 - **Explore** – Browse all public portfolios
 - **Public profile** – View other users' portfolios in full detail
+- **Hire requests** – Companies can send hire requests; portfolio owners see them in-app
+- **Account types** – Portfolio owner (showcase work) or Hirer (find talent)
+
+## Roadmap
+
+- [ ] Notifications for hire requests
+- [ ] Rich portfolio themes & templates
+- [ ] Analytics for portfolio views
+- [ ] Team/company profiles for hirers
 
 ## Firebase setup
+
+Works on the **free Spark plan** (no Blaze needed).
 
 1. Create a project at [Firebase Console](https://console.firebase.google.com)
 2. Enable **Authentication** (Email/Password) and **Firestore**

@@ -23,6 +23,15 @@ class PortfolioFirestoreService {
     await _firestore.collection(_collection).doc(uid).set(data, SetOptions(merge: true));
   }
 
+  /// Whether the current user's portfolio is published.
+  Future<bool> isPublished() async {
+    final uid = _auth.currentUser?.uid;
+    if (uid == null) return false;
+    final doc = await _firestore.collection(_collection).doc(uid).get();
+    final data = doc.data();
+    return data?['published'] == true;
+  }
+
   /// Unpublish (remove from public listings).
   Future<void> setPublished(bool published) async {
     final uid = _auth.currentUser?.uid;

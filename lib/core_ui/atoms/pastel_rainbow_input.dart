@@ -110,7 +110,7 @@ class _PastelRainbowInputState extends State<PastelRainbowInput>
                       vertical: 14,
                     ),
                   ),
-                ),
+                ),  
               ),
             ],
           ),
