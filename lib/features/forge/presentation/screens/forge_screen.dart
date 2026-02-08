@@ -26,10 +26,26 @@ class _ForgeScreenState extends ConsumerState<ForgeScreen> {
     try {
       final pdf = await ProfilePdfBuilder.build(profile, _theme);
       final path = await ProfilePdfBuilder.saveToTempFile(pdf);
-      await Share.shareXFiles([XFile(path)], text: 'Portfolio — ${profile.fullName.isEmpty ? 'ProfileForge' : profile.fullName}');
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Shared'), behavior: SnackBarBehavior.floating));
+      await Share.shareXFiles(
+        [XFile(path)],
+        text:
+            'Portfolio — ${profile.fullName.isEmpty ? 'ProfileForge' : profile.fullName}',
+      );
+      if (mounted)
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Shared'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
     } catch (e) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Export failed: $e'), behavior: SnackBarBehavior.floating));
+      if (mounted)
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Export failed: $e'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
     } finally {
       if (mounted) setState(() => _exporting = false);
     }
@@ -49,14 +65,25 @@ class _ForgeScreenState extends ConsumerState<ForgeScreen> {
           const SizedBox(height: 16),
           Text('Export as PDF', style: Theme.of(context).textTheme.titleLarge),
           const SizedBox(height: 8),
-          Text('Choose a theme and share your portfolio as a PDF.', style: Theme.of(context).textTheme.bodyMedium),
+          Text(
+            'Choose a theme and share your portfolio as a PDF.',
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
           const SizedBox(height: 24),
           Text('Theme', style: Theme.of(context).textTheme.titleSmall),
           const SizedBox(height: 8),
           SegmentedButton<PdfTheme>(
             segments: const [
-              ButtonSegment(value: PdfTheme.modern, label: Text('Modern'), icon: Icon(Icons.auto_awesome)),
-              ButtonSegment(value: PdfTheme.classic, label: Text('Classic'), icon: Icon(Icons.description)),
+              ButtonSegment(
+                value: PdfTheme.modern,
+                label: Text('Modern'),
+                icon: Icon(Icons.auto_awesome),
+              ),
+              ButtonSegment(
+                value: PdfTheme.classic,
+                label: Text('Classic'),
+                icon: Icon(Icons.description),
+              ),
             ],
             selected: {_theme},
             onSelectionChanged: (s) => setState(() => _theme = s.first),
@@ -64,12 +91,24 @@ class _ForgeScreenState extends ConsumerState<ForgeScreen> {
           const SizedBox(height: 32),
           FilledButton.icon(
             onPressed: (_exporting || !hasProfile) ? null : _exportAndShare,
-            icon: _exporting ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)) : const Icon(Icons.share),
+            icon: _exporting
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Icon(Icons.share),
             label: Text(_exporting ? 'Exporting…' : 'Export & Share PDF'),
-            style: FilledButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 16)),
+            style: FilledButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+            ),
           ),
           if (!hasProfile) const SizedBox(height: 8),
-          if (!hasProfile) Text('Load your profile first from the home screen.', style: Theme.of(context).textTheme.bodySmall),
+          if (!hasProfile)
+            Text(
+              'Load your profile first from the home screen.',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
         ],
       ),
     );

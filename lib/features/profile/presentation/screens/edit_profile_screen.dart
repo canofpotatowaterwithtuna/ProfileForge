@@ -57,21 +57,33 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
           content: TextField(
             controller: controller,
             autofocus: true,
-            decoration: const InputDecoration(hintText: 'e.g. Flutter, UI Design'),
+            decoration: const InputDecoration(
+              hintText: 'e.g. Flutter, UI Design',
+            ),
             onSubmitted: (_) => Navigator.pop(ctx, controller.text.trim()),
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
-            FilledButton(onPressed: () => Navigator.pop(ctx, controller.text.trim()), child: const Text('Add')),
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(ctx, controller.text.trim()),
+              child: const Text('Add'),
+            ),
           ],
         );
       },
     ).then((value) {
-      if (value != null && value.isNotEmpty) setState(() => _skills = [..._skills, Skill(id: _uuid.v4(), name: value)]);
+      if (value != null && value.isNotEmpty)
+        setState(
+          () => _skills = [..._skills, Skill(id: _uuid.v4(), name: value)],
+        );
     });
   }
 
-  void _removeSkill(Skill skill) => setState(() => _skills = _skills.where((s) => s.id != skill.id).toList());
+  void _removeSkill(Skill skill) =>
+      setState(() => _skills = _skills.where((s) => s.id != skill.id).toList());
 
   void _addLink() {
     showDialog<ProfileLink?>(
@@ -84,24 +96,44 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              TextField(controller: titleController, decoration: const InputDecoration(labelText: 'Label', hintText: 'e.g. GitHub')),
+              TextField(
+                controller: titleController,
+                decoration: const InputDecoration(
+                  labelText: 'Label',
+                  hintText: 'e.g. GitHub',
+                ),
+              ),
               const SizedBox(height: 12),
               TextField(
                 controller: urlController,
-                decoration: const InputDecoration(labelText: 'URL', hintText: 'https://...'),
+                decoration: const InputDecoration(
+                  labelText: 'URL',
+                  hintText: 'https://...',
+                ),
                 keyboardType: TextInputType.url,
                 autocorrect: false,
               ),
             ],
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('Cancel'),
+            ),
             FilledButton(
               onPressed: () {
                 var url = urlController.text.trim();
                 if (url.isNotEmpty) {
-                  if (!url.contains(RegExp(r'^https?://'))) url = 'https://$url';
-                  Navigator.pop(ctx, ProfileLink(id: _uuid.v4(), title: titleController.text.trim(), url: url));
+                  if (!url.contains(RegExp(r'^https?://')))
+                    url = 'https://$url';
+                  Navigator.pop(
+                    ctx,
+                    ProfileLink(
+                      id: _uuid.v4(),
+                      title: titleController.text.trim(),
+                      url: url,
+                    ),
+                  );
                 }
               },
               child: const Text('Add'),
@@ -114,7 +146,8 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     });
   }
 
-  void _removeLink(ProfileLink link) => setState(() => _links = _links.where((l) => l.id != link.id).toList());
+  void _removeLink(ProfileLink link) =>
+      setState(() => _links = _links.where((l) => l.id != link.id).toList());
 
   void _addExperience() {
     showDialog<Experience?>(
@@ -130,20 +163,57 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                TextField(controller: role, decoration: const InputDecoration(labelText: 'Role', hintText: 'e.g. Software Engineer')),
+                TextField(
+                  controller: role,
+                  decoration: const InputDecoration(
+                    labelText: 'Role',
+                    hintText: 'e.g. Software Engineer',
+                  ),
+                ),
                 const SizedBox(height: 12),
-                TextField(controller: company, decoration: const InputDecoration(labelText: 'Company', hintText: 'e.g. Acme Inc')),
+                TextField(
+                  controller: company,
+                  decoration: const InputDecoration(
+                    labelText: 'Company',
+                    hintText: 'e.g. Acme Inc',
+                  ),
+                ),
                 const SizedBox(height: 12),
-                TextField(controller: period, decoration: const InputDecoration(labelText: 'Period', hintText: 'e.g. 2020 – Present')),
+                TextField(
+                  controller: period,
+                  decoration: const InputDecoration(
+                    labelText: 'Period',
+                    hintText: 'e.g. 2020 – Present',
+                  ),
+                ),
                 const SizedBox(height: 12),
-                TextField(controller: desc, maxLines: 2, decoration: const InputDecoration(labelText: 'Description', alignLabelWithHint: true)),
+                TextField(
+                  controller: desc,
+                  maxLines: 2,
+                  decoration: const InputDecoration(
+                    labelText: 'Description',
+                    alignLabelWithHint: true,
+                  ),
+                ),
               ],
             ),
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('Cancel'),
+            ),
             FilledButton(
-              onPressed: () => Navigator.pop(ctx, Experience(id: _uuid.v4(), role: role.text.trim(), company: company.text.trim(), period: period.text.trim(), description: desc.text.trim())),
+              onPressed: () => Navigator.pop(
+                ctx,
+                Experience(
+                  id: _uuid.v4(),
+                  role: role.text.trim(),
+                  company: company.text.trim(),
+                  period: period.text.trim(),
+                  description: desc.text.trim(),
+                ),
+              ),
               child: const Text('Add'),
             ),
           ],
@@ -154,14 +224,20 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     });
   }
 
-  void _removeExperience(Experience e) => setState(() => _experience = _experience.where((x) => x.id != e.id).toList());
+  void _removeExperience(Experience e) => setState(
+    () => _experience = _experience.where((x) => x.id != e.id).toList(),
+  );
 
   Future<void> _save() async {
     if (_saving) return;
     final profile = widget.profile.copyWith(
-      fullName: _nameController.text.trim().isEmpty ? 'Your name' : _nameController.text.trim(),
+      fullName: _nameController.text.trim().isEmpty
+          ? 'Your name'
+          : _nameController.text.trim(),
       headline: _headlineController.text.trim(),
-      bio: _bioController.text.trim().isEmpty ? 'Tell people about yourself.' : _bioController.text.trim(),
+      bio: _bioController.text.trim().isEmpty
+          ? 'Tell people about yourself.'
+          : _bioController.text.trim(),
       email: _emailController.text.trim(),
       skills: _skills,
       links: _links,
@@ -169,13 +245,26 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     );
     setState(() => _saving = true);
     try {
-      final ok = await ref.read(profileProvider.notifier).updateFullProfile(profile);
+      final ok = await ref
+          .read(profileProvider.notifier)
+          .updateFullProfile(profile);
       if (!mounted) return;
       if (ok) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Portfolio saved'), behavior: SnackBarBehavior.floating));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Portfolio saved'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
         context.pop();
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Failed to save. Try again.'), behavior: SnackBarBehavior.floating, backgroundColor: Colors.red));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Failed to save. Try again.'),
+            behavior: SnackBarBehavior.floating,
+            backgroundColor: Colors.red,
+          ),
+        );
       }
     } finally {
       if (mounted) setState(() => _saving = false);
@@ -198,14 +287,21 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     });
   }
 
-  TextStyle? _sectionLabel(BuildContext context) => Theme.of(context).textTheme.titleSmall?.copyWith(color: Theme.of(context).colorScheme.primary);
+  TextStyle? _sectionLabel(BuildContext context) => Theme.of(context)
+      .textTheme
+      .titleSmall
+      ?.copyWith(color: Theme.of(context).colorScheme.primary);
 
   Widget _sectionHeader(String title, {required VoidCallback onAdd}) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(title, style: _sectionLabel(context)),
-        TextButton.icon(onPressed: onAdd, icon: const Icon(Icons.add, size: 20), label: const Text('Add')),
+        TextButton.icon(
+          onPressed: onAdd,
+          icon: const Icon(Icons.add, size: 20),
+          label: const Text('Add'),
+        ),
       ],
     );
   }
@@ -213,7 +309,12 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   Widget _hint(BuildContext context, String text) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 12),
-      child: Text(text, style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+      child: Text(
+        text,
+        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
+        ),
+      ),
     );
   }
 
@@ -225,7 +326,13 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
         actions: [
           TextButton(
             onPressed: _saving ? null : _save,
-            child: _saving ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)) : const Text('Save'),
+            child: _saving
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Text('Save'),
           ),
         ],
       ),
@@ -234,19 +341,40 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
         children: [
           Text('Name', style: _sectionLabel(context)),
           const SizedBox(height: 8),
-          TextField(controller: _nameController, decoration: const InputDecoration(hintText: 'Your full name'), textCapitalization: TextCapitalization.words),
+          TextField(
+            controller: _nameController,
+            decoration: const InputDecoration(hintText: 'Your full name'),
+            textCapitalization: TextCapitalization.words,
+          ),
           const SizedBox(height: 20),
           Text('Headline', style: _sectionLabel(context)),
           const SizedBox(height: 8),
-          TextField(controller: _headlineController, decoration: const InputDecoration(hintText: 'e.g. Flutter Developer · Building apps'), textCapitalization: TextCapitalization.words),
+          TextField(
+            controller: _headlineController,
+            decoration: const InputDecoration(
+              hintText: 'e.g. Flutter Developer · Building apps',
+            ),
+            textCapitalization: TextCapitalization.words,
+          ),
           const SizedBox(height: 20),
           Text('Bio', style: _sectionLabel(context)),
           const SizedBox(height: 8),
-          TextField(controller: _bioController, maxLines: 4, decoration: const InputDecoration(hintText: 'Short bio or tagline', alignLabelWithHint: true)),
+          TextField(
+            controller: _bioController,
+            maxLines: 4,
+            decoration: const InputDecoration(
+              hintText: 'Short bio or tagline',
+              alignLabelWithHint: true,
+            ),
+          ),
           const SizedBox(height: 20),
           Text('Email', style: _sectionLabel(context)),
           const SizedBox(height: 8),
-          TextField(controller: _emailController, decoration: const InputDecoration(hintText: 'you@example.com'), keyboardType: TextInputType.emailAddress),
+          TextField(
+            controller: _emailController,
+            decoration: const InputDecoration(hintText: 'you@example.com'),
+            keyboardType: TextInputType.emailAddress,
+          ),
           const SizedBox(height: 24),
           _sectionHeader('Skills', onAdd: _addSkill),
           const SizedBox(height: 8),
@@ -261,9 +389,16 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                     final s = _skills[index];
                     return ListTile(
                       key: ValueKey(s.id),
-                      leading: ReorderableDragStartListener(index: index, child: const Icon(Icons.drag_handle)),
+                      leading: ReorderableDragStartListener(
+                        index: index,
+                        child: const Icon(Icons.drag_handle),
+                      ),
                       title: Text(s.name),
-                      trailing: IconButton(icon: const Icon(Icons.close), onPressed: () => _removeSkill(s), tooltip: 'Remove'),
+                      trailing: IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () => _removeSkill(s),
+                        tooltip: 'Remove',
+                      ),
                     );
                   },
                 ),
@@ -282,9 +417,20 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                 final e = _experience[index];
                 return ListTile(
                   key: ValueKey(e.id),
-                  title: Text('${e.role}${e.company.isNotEmpty ? ' at ${e.company}' : ''}'),
-                  subtitle: Text([if (e.period.isNotEmpty) e.period, if (e.description.isNotEmpty) e.description].join(' · ')),
-                  trailing: IconButton(icon: const Icon(Icons.close), onPressed: () => _removeExperience(e), tooltip: 'Remove'),
+                  title: Text(
+                    '${e.role}${e.company.isNotEmpty ? ' at ${e.company}' : ''}',
+                  ),
+                  subtitle: Text(
+                    [
+                      if (e.period.isNotEmpty) e.period,
+                      if (e.description.isNotEmpty) e.description,
+                    ].join(' · '),
+                  ),
+                  trailing: IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () => _removeExperience(e),
+                    tooltip: 'Remove',
+                  ),
                 );
               },
             ),
@@ -294,16 +440,32 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
           if (_links.isEmpty)
             _hint(context, 'Add GitHub, website, or social profiles.')
           else
-            ..._links.map((l) => ListTile(
-                  title: Text(l.title.isEmpty ? l.url : l.title),
-                  subtitle: l.title.isNotEmpty ? Text(l.url, maxLines: 1, overflow: TextOverflow.ellipsis) : null,
-                  trailing: IconButton(icon: const Icon(Icons.close), onPressed: () => _removeLink(l), tooltip: 'Remove'),
-                )),
+            ..._links.map(
+              (l) => ListTile(
+                title: Text(l.title.isEmpty ? l.url : l.title),
+                subtitle: l.title.isNotEmpty
+                    ? Text(l.url, maxLines: 1, overflow: TextOverflow.ellipsis)
+                    : null,
+                trailing: IconButton(
+                  icon: const Icon(Icons.close),
+                  onPressed: () => _removeLink(l),
+                  tooltip: 'Remove',
+                ),
+              ),
+            ),
           const SizedBox(height: 48),
           FilledButton(
             onPressed: _saving ? null : _save,
-            style: FilledButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 16)),
-            child: _saving ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2)) : const Text('Save portfolio'),
+            style: FilledButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+            ),
+            child: _saving
+                ? const SizedBox(
+                    height: 20,
+                    width: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Text('Save portfolio'),
           ),
         ],
       ),

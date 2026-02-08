@@ -37,7 +37,10 @@ class EliteThemeExtension extends ThemeExtension<EliteThemeExtension> {
   }
 
   @override
-  EliteThemeExtension lerp(ThemeExtension<EliteThemeExtension>? other, double t) {
+  EliteThemeExtension lerp(
+    ThemeExtension<EliteThemeExtension>? other,
+    double t,
+  ) {
     if (other is! EliteThemeExtension) return this;
     return EliteThemeExtension(
       cardRadius: lerpDouble(cardRadius, other.cardRadius, t)!,

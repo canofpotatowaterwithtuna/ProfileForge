@@ -12,7 +12,9 @@ String portfolioToShareableText(UserProfile p) {
   if (p.experience.isNotEmpty) {
     buffer.writeln('\nExperience');
     for (final e in p.experience) {
-      buffer.writeln('• ${e.role}${e.company.isNotEmpty ? ' at ${e.company}' : ''}${e.period.isNotEmpty ? ' · ${e.period}' : ''}');
+      buffer.writeln(
+        '• ${e.role}${e.company.isNotEmpty ? ' at ${e.company}' : ''}${e.period.isNotEmpty ? ' · ${e.period}' : ''}',
+      );
       if (e.description.isNotEmpty) buffer.writeln('  ${e.description}');
     }
   }

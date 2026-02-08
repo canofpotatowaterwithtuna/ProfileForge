@@ -22,14 +22,34 @@ class EliteFilledButton extends StatelessWidget {
     final elite = Theme.of(context).extension<EliteThemeExtension>();
     final style = FilledButton.styleFrom(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(elite?.buttonRadius ?? 14)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(elite?.buttonRadius ?? 14),
+      ),
     );
     return FilledButton(
       onPressed: loading ? null : onPressed,
       style: style,
       child: loading
-          ? SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2, color: style.foregroundColor?.resolve({})))
-          : (icon != null ? (label.isEmpty ? icon : Row(mainAxisSize: MainAxisSize.min, children: [icon!, const SizedBox(width: 8), Text(label)])) : Text(label)),
+          ? SizedBox(
+              height: 20,
+              width: 20,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: style.foregroundColor?.resolve({}),
+              ),
+            )
+          : (icon != null
+                ? (label.isEmpty
+                      ? icon
+                      : Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            icon!,
+                            const SizedBox(width: 8),
+                            Text(label),
+                          ],
+                        ))
+                : Text(label)),
     );
   }
 }
@@ -54,9 +74,16 @@ class EliteOutlinedButton extends StatelessWidget {
       onPressed: onPressed,
       style: OutlinedButton.styleFrom(
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(elite?.buttonRadius ?? 14)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(elite?.buttonRadius ?? 14),
+        ),
       ),
-      child: icon != null ? Row(mainAxisSize: MainAxisSize.min, children: [icon!, const SizedBox(width: 8), Text(label)]) : Text(label),
+      child: icon != null
+          ? Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [icon!, const SizedBox(width: 8), Text(label)],
+            )
+          : Text(label),
     );
   }
 }

@@ -9,9 +9,19 @@ class ProfileFirestoreDto {
       'bio': p.bio,
       'email': p.email,
       'skills': p.skills.map((s) => {'id': s.id, 'name': s.name}).toList(),
-      'links': p.links.map((l) => {'id': l.id, 'title': l.title, 'url': l.url}).toList(),
+      'links': p.links
+          .map((l) => {'id': l.id, 'title': l.title, 'url': l.url})
+          .toList(),
       'experience': p.experience
-          .map((e) => {'id': e.id, 'role': e.role, 'company': e.company, 'period': e.period, 'description': e.description})
+          .map(
+            (e) => {
+              'id': e.id,
+              'role': e.role,
+              'company': e.company,
+              'period': e.period,
+              'description': e.description,
+            },
+          )
           .toList(),
       'searchText': _searchText(p),
     };
@@ -23,7 +33,9 @@ class ProfileFirestoreDto {
       p.headline,
       p.bio,
       p.skills.map((s) => s.name).join(' '),
-      p.experience.map((e) => '${e.role} ${e.company} ${e.description}').join(' '),
+      p.experience
+          .map((e) => '${e.role} ${e.company} ${e.description}')
+          .join(' '),
     ];
     return parts.join(' ').toLowerCase();
   }

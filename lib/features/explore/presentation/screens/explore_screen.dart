@@ -29,7 +29,9 @@ class ExploreScreen extends ConsumerWidget {
                   height: 100,
                   margin: const EdgeInsets.only(bottom: 12),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.surfaceContainerHighest,
                     borderRadius: BorderRadius.circular(16),
                   ),
                 ),
@@ -41,11 +43,22 @@ class ExploreScreen extends ConsumerWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.error_outline, size: 48, color: Theme.of(context).colorScheme.error),
+                  Icon(
+                    Icons.error_outline,
+                    size: 48,
+                    color: Theme.of(context).colorScheme.error,
+                  ),
                   const SizedBox(height: 16),
-                  Text('Failed to load', style: Theme.of(context).textTheme.titleMedium),
+                  Text(
+                    'Failed to load',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
                   const SizedBox(height: 8),
-                  Text(snap.error.toString(), textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodySmall),
+                  Text(
+                    snap.error.toString(),
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
                 ],
               ),
             );
@@ -58,13 +71,22 @@ class ExploreScreen extends ConsumerWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.explore_outlined, size: 64, color: Theme.of(context).colorScheme.outline),
+                    Icon(
+                      Icons.explore_outlined,
+                      size: 64,
+                      color: Theme.of(context).colorScheme.outline,
+                    ),
                     const SizedBox(height: 24),
-                    Text('No portfolios yet', style: Theme.of(context).textTheme.titleLarge),
+                    Text(
+                      'No portfolios yet',
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
                     const SizedBox(height: 8),
                     Text(
                       'Be the first to publish and get discovered',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 24),
@@ -86,7 +108,7 @@ class ExploreScreen extends ConsumerWidget {
               final doc = docs[i];
               final data = doc.data();
               final profile = ProfileFirestoreDto.fromMap(data);
-              final userId = doc.id;
+              final userId = (data['userId'] as String?) ?? doc.id;
               return _PortfolioCard(
                 profile: profile,
                 onTap: () => context.push('/profile/$userId'),
@@ -120,8 +142,13 @@ class _PortfolioCard extends StatelessWidget {
               CircleAvatar(
                 radius: 28,
                 child: Text(
-                  profile.fullName.isEmpty ? '?' : profile.fullName[0].toUpperCase(),
-                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                  profile.fullName.isEmpty
+                      ? '?'
+                      : profile.fullName[0].toUpperCase(),
+                  style: const TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
               const SizedBox(width: 16),
@@ -129,16 +156,40 @@ class _PortfolioCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(profile.fullName.isEmpty ? 'Anonymous' : profile.fullName, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600)),
-                    if (profile.headline.isNotEmpty) Text(profile.headline, style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant), maxLines: 2, overflow: TextOverflow.ellipsis),
+                    Text(
+                      profile.fullName.isEmpty ? 'Anonymous' : profile.fullName,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    if (profile.headline.isNotEmpty)
+                      Text(
+                        profile.headline,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     if (skills.isNotEmpty) ...[
                       const SizedBox(height: 4),
-                      Text(skills, style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.primary), maxLines: 1, overflow: TextOverflow.ellipsis),
+                      Text(
+                        skills,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ],
                   ],
                 ),
               ),
-              Icon(Icons.arrow_forward_ios, size: 14, color: Theme.of(context).colorScheme.onSurfaceVariant),
+              Icon(
+                Icons.arrow_forward_ios,
+                size: 14,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
             ],
           ),
         ),

@@ -10,7 +10,7 @@ class HomeWrapper extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final accountTypeAsync = ref.watch(_accountTypeStreamProvider);
+    final accountTypeAsync = ref.watch(accountTypeStreamProvider);
 
     return accountTypeAsync.when(
       data: (accountType) {
@@ -18,13 +18,13 @@ class HomeWrapper extends ConsumerWidget {
         return const HomeScreen();
       },
       loading: () => Scaffold(
-        body: Center(child: CircularProgressIndicator(color: Theme.of(context).colorScheme.primary)),
+        body: Center(
+          child: CircularProgressIndicator(
+            color: Theme.of(context).colorScheme.primary,
+          ),
+        ),
       ),
       error: (_, __) => const HomeScreen(),
     );
   }
 }
-
-final _accountTypeStreamProvider = StreamProvider<String?>((ref) {
-  return ref.watch(accountTypeServiceProvider).streamAccountType();
-});

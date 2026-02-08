@@ -19,7 +19,8 @@ class LinkFavicon extends StatelessWidget {
     return 'https://www.google.com/s2/favicons?domain=${uri.host}&sz=64';
   }
 
-  Widget _fallbackIcon(Color color) => Icon(Icons.link, size: size, color: color);
+  Widget _fallbackIcon(Color color) =>
+      Icon(Icons.link, size: size, color: color);
 
   @override
   Widget build(BuildContext context) {

@@ -26,14 +26,21 @@ class _AccountTypeScreenState extends ConsumerState<AccountTypeScreen> {
     if (_selected == null) return;
     setState(() => _loading = true);
     try {
-      await ref.read(accountTypeServiceProvider).setAccountType(
+      await ref
+          .read(accountTypeServiceProvider)
+          .setAccountType(
             accountType: _selected!,
-            companyName: _selected == 'hirer' ? _companyController.text.trim() : null,
+            companyName: _selected == 'hirer'
+                ? _companyController.text.trim()
+                : null,
           );
       if (!mounted) return;
-      context.go('/');
+      context.go('/discover');
     } catch (e) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed: $e'), backgroundColor: Colors.red));
+      if (mounted)
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed: $e'), backgroundColor: Colors.red),
+        );
     } finally {
       if (mounted) setState(() => _loading = false);
     }
@@ -51,11 +58,27 @@ class _AccountTypeScreenState extends ConsumerState<AccountTypeScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const Spacer(flex: 1),
-              Icon(Icons.workspace_premium, size: 64, color: colorScheme.primary),
+              Icon(
+                Icons.workspace_premium,
+                size: 64,
+                color: colorScheme.primary,
+              ),
               const SizedBox(height: 24),
-              Text('How will you use ProfileForge?', style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold), textAlign: TextAlign.center),
+              Text(
+                'How will you use ProfileForge?',
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
+              ),
               const SizedBox(height: 8),
-              Text('Choose your account type. You can change this later.', style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: colorScheme.onSurfaceVariant), textAlign: TextAlign.center),
+              Text(
+                'Choose your account type. You can change this later.',
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                ),
+                textAlign: TextAlign.center,
+              ),
               const SizedBox(height: 32),
               _OptionTile(
                 icon: Icons.person,
@@ -76,15 +99,26 @@ class _AccountTypeScreenState extends ConsumerState<AccountTypeScreen> {
                 const SizedBox(height: 16),
                 TextField(
                   controller: _companyController,
-                  decoration: const InputDecoration(labelText: 'Company name (optional)', hintText: 'Acme Inc'),
+                  decoration: const InputDecoration(
+                    labelText: 'Company name (optional)',
+                    hintText: 'Acme Inc',
+                  ),
                   textCapitalization: TextCapitalization.words,
                 ),
               ],
               const Spacer(flex: 1),
               FilledButton(
                 onPressed: (_selected == null || _loading) ? null : _save,
-                style: FilledButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 16)),
-                child: _loading ? const SizedBox(height: 24, width: 24, child: CircularProgressIndicator(strokeWidth: 2)) : const Text('Continue'),
+                style: FilledButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                ),
+                child: _loading
+                    ? const SizedBox(
+                        height: 24,
+                        width: 24,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Text('Continue'),
               ),
             ],
           ),
@@ -95,7 +129,13 @@ class _AccountTypeScreenState extends ConsumerState<AccountTypeScreen> {
 }
 
 class _OptionTile extends StatelessWidget {
-  const _OptionTile({required this.icon, required this.title, required this.subtitle, required this.selected, required this.onTap});
+  const _OptionTile({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.selected,
+    required this.onTap,
+  });
 
   final IconData icon;
   final String title;
@@ -108,7 +148,9 @@ class _OptionTile extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Material(
-      color: selected ? colorScheme.primaryContainer.withValues(alpha: 0.5) : colorScheme.surfaceContainerHighest,
+      color: selected
+          ? colorScheme.primaryContainer.withValues(alpha: 0.5)
+          : colorScheme.surfaceContainerHighest,
       borderRadius: BorderRadius.circular(16),
       child: InkWell(
         onTap: onTap,
@@ -119,7 +161,10 @@ class _OptionTile extends StatelessWidget {
             children: [
               Container(
                 padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(color: colorScheme.primary.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(12)),
+                decoration: BoxDecoration(
+                  color: colorScheme.primary.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(12),
+                ),
                 child: Icon(icon, size: 28, color: colorScheme.primary),
               ),
               const SizedBox(width: 16),
@@ -127,13 +172,24 @@ class _OptionTile extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(title, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600)),
+                    Text(
+                      title,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                     const SizedBox(height: 4),
-                    Text(subtitle, style: Theme.of(context).textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant)),
+                    Text(
+                      subtitle,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                    ),
                   ],
                 ),
               ),
-              if (selected) Icon(Icons.check_circle, color: colorScheme.primary),
+              if (selected)
+                Icon(Icons.check_circle, color: colorScheme.primary),
             ],
           ),
         ),

@@ -20,7 +20,10 @@ class PortfolioFirestoreService {
     data['userId'] = uid;
     data['published'] = true;
     data['updatedAt'] = FieldValue.serverTimestamp();
-    await _firestore.collection(_collection).doc(uid).set(data, SetOptions(merge: true));
+    await _firestore
+        .collection(_collection)
+        .doc(uid)
+        .set(data, SetOptions(merge: true));
   }
 
   /// Whether the current user's portfolio is published.
@@ -36,7 +39,10 @@ class PortfolioFirestoreService {
   Future<void> setPublished(bool published) async {
     final uid = _auth.currentUser?.uid;
     if (uid == null) return;
-    await _firestore.collection(_collection).doc(uid).update({'published': published, 'updatedAt': FieldValue.serverTimestamp()});
+    await _firestore.collection(_collection).doc(uid).update({
+      'published': published,
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
   }
 
   /// Fetch all public portfolios (for Explore).
@@ -50,7 +56,10 @@ class PortfolioFirestoreService {
 
   /// Fetch all public portfolios once (for AI search).
   Future<List<PublicPortfolio>> fetchPublicPortfolios() async {
-    final snap = await _firestore.collection(_collection).where('published', isEqualTo: true).get();
+    final snap = await _firestore
+        .collection(_collection)
+        .where('published', isEqualTo: true)
+        .get();
     return snap.docs.map((d) => _docToPublic(d)).toList();
   }
 
@@ -66,7 +75,8 @@ class PortfolioFirestoreService {
   PublicPortfolio _docToPublic(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>? ?? {};
     final profile = ProfileFirestoreDto.fromMap(data);
-    return PublicPortfolio(userId: doc.id, profile: profile);
+    final userId = (data['userId'] as String?) ?? doc.id;
+    return PublicPortfolio(userId: userId, profile: profile);
   }
 }
 

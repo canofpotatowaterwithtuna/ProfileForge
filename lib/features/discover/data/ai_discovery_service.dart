@@ -10,8 +10,9 @@ class AiDiscoveryService {
 
   /// Creates a service using Firebase AI Logic (Gemini Developer API).
   static AiDiscoveryService create() {
-    final model =
-        FirebaseAI.googleAI().generativeModel(model: 'gemini-2.5-flash');
+    final model = FirebaseAI.googleAI().generativeModel(
+      model: 'gemini-2.5-flash',
+    );
     return AiDiscoveryService(model);
   }
 
@@ -29,19 +30,25 @@ class AiDiscoveryService {
       );
     }
 
-    final summaries = portfolios.asMap().entries.map((e) {
-      final p = e.value.profile;
-      final skills = p.skills.map((s) => s.name).join(', ');
-      final exp =
-          p.experience.map((x) => '${x.role} at ${x.company}').join('; ');
-      return '[${e.key}] ${p.fullName} | ${p.headline} | ${p.bio} | Skills: $skills | Experience: $exp';
-    }).join('\n');
+    final summaries = portfolios
+        .asMap()
+        .entries
+        .map((e) {
+          final p = e.value.profile;
+          final skills = p.skills.map((s) => s.name).join(', ');
+          final exp = p.experience
+              .map((x) => '${x.role} at ${x.company}')
+              .join('; ');
+          return '[${e.key}] ${p.fullName} | ${p.headline} | ${p.bio} | Skills: $skills | Experience: $exp';
+        })
+        .join('\n');
 
     const systemPrompt = '''
 You are a strict portfolio matching assistant. Given a list of portfolios (each prefixed with [index]) and a user's description of who they're looking for, return ONLY the indices of portfolios that GENUINELY match the user's request. The match must be clear and relevant—e.g. "painting professional" must match artists/painters, NOT software developers or unrelated fields. Return at most 10 indices. If NO portfolio genuinely matches the description, return exactly "none". Do not guess or include loosely related profiles. Be strict about relevance.
 ''';
 
-    final prompt = '''
+    final prompt =
+        '''
 $systemPrompt
 
 Portfolios:

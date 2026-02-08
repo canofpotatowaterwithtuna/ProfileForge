@@ -71,7 +71,13 @@ class _ProfileStrengthPainter extends CustomPainter {
 
     const startAngle = -3.14159 / 2;
     final sweepAngle = 2 * 3.14159 * strength;
-    canvas.drawArc(Rect.fromCircle(center: center, radius: radius), startAngle, sweepAngle, false, fgPaint);
+    canvas.drawArc(
+      Rect.fromCircle(center: center, radius: radius),
+      startAngle,
+      sweepAngle,
+      false,
+      fgPaint,
+    );
   }
 
   @override

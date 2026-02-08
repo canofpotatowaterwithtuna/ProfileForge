@@ -6,7 +6,9 @@ import '../../features/profile/data/repositories/profile_repository_mock_impl.da
 import '../../features/profile/domain/models/profile_model.dart';
 import '../../features/profile/domain/repositories/i_profile_repository.dart';
 
-final profileStorageProvider = FutureProvider<ProfileStorage>((ref) => ProfileStorage.create());
+final profileStorageProvider = FutureProvider<ProfileStorage>(
+  (ref) => ProfileStorage.create(),
+);
 
 /// Default: local (SharedPreferences). Override in tests with [profileRepositoryMockOverride].
 final profileRepositoryProvider = Provider<IProfileRepository>((ref) {

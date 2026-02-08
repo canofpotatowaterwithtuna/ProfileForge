@@ -17,7 +17,9 @@ class PublicProfileScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final currentUid = FirebaseAuth.instance.currentUser?.uid;
-    final canHire = currentUid != null && currentUid != userId;
+    final accountTypeAsync = ref.watch(accountTypeStreamProvider);
+    final isHirer = accountTypeAsync.value == 'hirer';
+    final canHire = currentUid != null && currentUid != userId && isHirer;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Portfolio')),
@@ -32,11 +34,22 @@ class PublicProfileScreen extends ConsumerWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.error_outline, size: 48, color: Theme.of(context).colorScheme.error),
+                  Icon(
+                    Icons.error_outline,
+                    size: 48,
+                    color: Theme.of(context).colorScheme.error,
+                  ),
                   const SizedBox(height: 16),
-                  Text('Failed to load', style: Theme.of(context).textTheme.titleMedium),
+                  Text(
+                    'Failed to load',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
                   const SizedBox(height: 8),
-                  Text(snap.error.toString(), textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodySmall),
+                  Text(
+                    snap.error.toString(),
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
                 ],
               ),
             );
@@ -47,11 +60,23 @@ class PublicProfileScreen extends ConsumerWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.person_off_outlined, size: 64, color: Theme.of(context).colorScheme.outline),
+                  Icon(
+                    Icons.person_off_outlined,
+                    size: 64,
+                    color: Theme.of(context).colorScheme.outline,
+                  ),
                   const SizedBox(height: 24),
-                  Text('Portfolio not found', style: Theme.of(context).textTheme.titleLarge),
+                  Text(
+                    'Portfolio not found',
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
                   const SizedBox(height: 8),
-                  Text('This portfolio may be private or unavailable.', style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+                  Text(
+                    'This portfolio may be private or unavailable.',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ),
                 ],
               ),
             );
@@ -71,7 +96,10 @@ class PublicProfileScreen extends ConsumerWidget {
               if (canHire)
                 SliverToBoxAdapter(
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 8,
+                    ),
                     child: FilledButton.icon(
                       onPressed: () => HireRequestDialog.show(
                         context,
@@ -97,10 +125,19 @@ class PublicProfileScreen extends ConsumerWidget {
                             if (profile.bio.isNotEmpty)
                               Text(
                                 profile.bio,
-                                style: Theme.of(context).textTheme.bodyLarge?.copyWith(height: 1.5, color: Theme.of(context).colorScheme.onSurface),
+                                style: Theme.of(context).textTheme.bodyLarge
+                                    ?.copyWith(
+                                      height: 1.5,
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.onSurface,
+                                    ),
                               ),
-                            if (profile.bio.isNotEmpty && profile.email.isNotEmpty) const SizedBox(height: 16),
-                            if (profile.email.isNotEmpty) _EmailChip(email: profile.email),
+                            if (profile.bio.isNotEmpty &&
+                                profile.email.isNotEmpty)
+                              const SizedBox(height: 16),
+                            if (profile.email.isNotEmpty)
+                              _EmailChip(email: profile.email),
                           ],
                         ),
                       ),
@@ -113,14 +150,30 @@ class PublicProfileScreen extends ConsumerWidget {
                         spacing: 10,
                         runSpacing: 10,
                         children: profile.skills
-                            .map((s) => Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                                  decoration: BoxDecoration(
-                                    color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: isDark ? 0.4 : 0.6),
-                                    borderRadius: BorderRadius.circular(12),
+                            .map(
+                              (s) => Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 10,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .primaryContainer
+                                      .withValues(alpha: isDark ? 0.4 : 0.6),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Text(
+                                  s.name,
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w500,
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.onPrimaryContainer,
                                   ),
-                                  child: Text(s.name, style: TextStyle(fontWeight: FontWeight.w500, color: Theme.of(context).colorScheme.onPrimaryContainer)),
-                                ))
+                                ),
+                              ),
+                            )
                             .toList(),
                       ),
                       const SizedBox(height: 24),
@@ -135,10 +188,43 @@ class PublicProfileScreen extends ConsumerWidget {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(e.role, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600)),
-                                if (e.company.isNotEmpty) Text(e.company, style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.primary)),
-                                if (e.period.isNotEmpty) Text(e.period, style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
-                                if (e.description.isNotEmpty) ...[const SizedBox(height: 8), Text(e.description, style: Theme.of(context).textTheme.bodyMedium?.copyWith(height: 1.4))],
+                                Text(
+                                  e.role,
+                                  style: Theme.of(context).textTheme.titleMedium
+                                      ?.copyWith(fontWeight: FontWeight.w600),
+                                ),
+                                if (e.company.isNotEmpty)
+                                  Text(
+                                    e.company,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodyMedium
+                                        ?.copyWith(
+                                          color: Theme.of(
+                                            context,
+                                          ).colorScheme.primary,
+                                        ),
+                                  ),
+                                if (e.period.isNotEmpty)
+                                  Text(
+                                    e.period,
+                                    style: Theme.of(context).textTheme.bodySmall
+                                        ?.copyWith(
+                                          color: Theme.of(
+                                            context,
+                                          ).colorScheme.onSurfaceVariant,
+                                        ),
+                                  ),
+                                if (e.description.isNotEmpty) ...[
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    e.description,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodyMedium
+                                        ?.copyWith(height: 1.4),
+                                  ),
+                                ],
                               ],
                             ),
                           ),
@@ -149,7 +235,12 @@ class PublicProfileScreen extends ConsumerWidget {
                     if (profile.links.isNotEmpty) ...[
                       _SectionTitle(title: 'Links'),
                       const SizedBox(height: 10),
-                      ...profile.links.map((l) => Padding(padding: const EdgeInsets.only(bottom: 8), child: _LinkTile(link: l))),
+                      ...profile.links.map(
+                        (l) => Padding(
+                          padding: const EdgeInsets.only(bottom: 8),
+                          child: _LinkTile(link: l),
+                        ),
+                      ),
                     ],
                     const SizedBox(height: 100),
                   ]),
@@ -164,7 +255,11 @@ class PublicProfileScreen extends ConsumerWidget {
 }
 
 class _HeroSection extends StatelessWidget {
-  const _HeroSection({required this.fullName, required this.headline, required this.isDark});
+  const _HeroSection({
+    required this.fullName,
+    required this.headline,
+    required this.isDark,
+  });
 
   final String fullName;
   final String headline;
@@ -179,7 +274,9 @@ class _HeroSection extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: isDark ? [const Color(0xFF4338CA), const Color(0xFF7C3AED)] : [const Color(0xFF6366F1), const Color(0xFFA855F7)],
+          colors: isDark
+              ? [const Color(0xFF4338CA), const Color(0xFF7C3AED)]
+              : [const Color(0xFF6366F1), const Color(0xFFA855F7)],
         ),
       ),
       child: Column(
@@ -190,26 +287,39 @@ class _HeroSection extends StatelessWidget {
             decoration: BoxDecoration(
               color: Colors.white.withValues(alpha: 0.25),
               shape: BoxShape.circle,
-              border: Border.all(color: Colors.white.withValues(alpha: 0.5), width: 2),
+              border: Border.all(
+                color: Colors.white.withValues(alpha: 0.5),
+                width: 2,
+              ),
             ),
             child: Center(
               child: Text(
                 fullName.isEmpty ? '?' : fullName.substring(0, 1).toUpperCase(),
-                style: const TextStyle(fontSize: 40, fontWeight: FontWeight.bold, color: Colors.white),
+                style: const TextStyle(
+                  fontSize: 40,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
               ),
             ),
           ),
           const SizedBox(height: 20),
           Text(
             fullName.isEmpty ? 'Anonymous' : fullName,
-            style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold, color: Colors.white, letterSpacing: -0.5),
+            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+              letterSpacing: -0.5,
+            ),
             textAlign: TextAlign.center,
           ),
           if (headline.isNotEmpty) ...[
             const SizedBox(height: 8),
             Text(
               headline,
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: Colors.white.withValues(alpha: 0.9)),
+              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                color: Colors.white.withValues(alpha: 0.9),
+              ),
               textAlign: TextAlign.center,
             ),
           ],
@@ -231,9 +341,21 @@ class _CardSection extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: isDark ? Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5) : Colors.white,
+        color: isDark
+            ? Theme.of(
+                context,
+              ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5)
+            : Colors.white,
         borderRadius: BorderRadius.circular(20),
-        boxShadow: isDark ? null : [BoxShadow(color: Colors.black.withValues(alpha: 0.06), blurRadius: 20, offset: const Offset(0, 4))],
+        boxShadow: isDark
+            ? null
+            : [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.06),
+                  blurRadius: 20,
+                  offset: const Offset(0, 4),
+                ),
+              ],
       ),
       child: child,
     );
@@ -250,10 +372,10 @@ class _SectionTitle extends StatelessWidget {
     return Text(
       title,
       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.w700,
-            color: Theme.of(context).colorScheme.primary,
-            letterSpacing: 0.2,
-          ),
+        fontWeight: FontWeight.w700,
+        color: Theme.of(context).colorScheme.primary,
+        letterSpacing: 0.2,
+      ),
     );
   }
 }
@@ -278,9 +400,19 @@ class _EmailChip extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.email_outlined, size: 18, color: Theme.of(context).colorScheme.primary),
+            Icon(
+              Icons.email_outlined,
+              size: 18,
+              color: Theme.of(context).colorScheme.primary,
+            ),
             const SizedBox(width: 8),
-            Text(email, style: TextStyle(color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.w500)),
+            Text(
+              email,
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.primary,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
           ],
         ),
       ),
@@ -296,7 +428,8 @@ class _LinkTile extends StatelessWidget {
   Future<void> _openUrl(BuildContext context) async {
     final uri = Uri.tryParse(link.url);
     if (uri == null) return;
-    if (await canLaunchUrl(uri)) await launchUrl(uri, mode: LaunchMode.externalApplication);
+    if (await canLaunchUrl(uri))
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
   }
 
   @override
@@ -304,7 +437,9 @@ class _LinkTile extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Material(
-      color: isDark ? colorScheme.surfaceContainerHighest.withValues(alpha: 0.5) : Colors.white,
+      color: isDark
+          ? colorScheme.surfaceContainerHighest.withValues(alpha: 0.5)
+          : Colors.white,
       borderRadius: BorderRadius.circular(16),
       child: InkWell(
         onTap: () => _openUrl(context),
@@ -315,21 +450,46 @@ class _LinkTile extends StatelessWidget {
             children: [
               Container(
                 padding: const EdgeInsets.all(6),
-                decoration: BoxDecoration(color: colorScheme.primary.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(12)),
-                child: Center(child: LinkFavicon(url: link.url, size: 28, fallbackColor: colorScheme.primary)),
+                decoration: BoxDecoration(
+                  color: colorScheme.primary.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Center(
+                  child: LinkFavicon(
+                    url: link.url,
+                    size: 28,
+                    fallbackColor: colorScheme.primary,
+                  ),
+                ),
               ),
               const SizedBox(width: 14),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(link.title.isEmpty ? link.url : link.title, style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600)),
+                    Text(
+                      link.title.isEmpty ? link.url : link.title,
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                     if (link.title.isNotEmpty && link.url != link.title)
-                      Text(link.url, style: Theme.of(context).textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant), maxLines: 1, overflow: TextOverflow.ellipsis),
+                      Text(
+                        link.url,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                   ],
                 ),
               ),
-              Icon(Icons.arrow_forward_ios, size: 14, color: colorScheme.onSurfaceVariant),
+              Icon(
+                Icons.arrow_forward_ios,
+                size: 14,
+                color: colorScheme.onSurfaceVariant,
+              ),
             ],
           ),
         ),

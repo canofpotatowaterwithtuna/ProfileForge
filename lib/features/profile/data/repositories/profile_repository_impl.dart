@@ -33,9 +33,7 @@ class ProfileRepositoryImpl implements IProfileRepository {
     return UserProfile(
       fullName: entity.fullName,
       bio: entity.bio,
-      skills: entity.skills
-          .map((s) => Skill(id: s, name: s))
-          .toList(),
+      skills: entity.skills.map((s) => Skill(id: s, name: s)).toList(),
     );
   }
 

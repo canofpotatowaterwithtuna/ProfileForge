@@ -28,6 +28,34 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
     super.dispose();
   }
 
+  Future<void> _signInWithGoogle() async {
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+    try {
+      final user = await ref.read(authServiceProvider).signInWithGoogle();
+      if (!mounted) return;
+      if (user != null) {
+        context.go('/discover');
+      }
+    } on FirebaseAuthException catch (e) {
+      if (!mounted) return;
+      setState(() => _error = e.message ?? 'Google sign-in failed');
+    } catch (e) {
+      if (!mounted) return;
+      final msg = e.toString();
+      if (msg.contains('sign_in_canceled') ||
+          msg.contains('popup_closed_by_user')) {
+        setState(() => _error = null);
+      } else {
+        setState(() => _error = 'Google sign-in failed');
+      }
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
   Future<void> _submit() async {
     final email = _emailController.text.trim();
     final password = _passwordController.text;
@@ -54,9 +82,16 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
         await auth.signInWithEmail(email, password);
       }
       if (!mounted) return;
-      context.go('/');  // Router redirects to /account-type if first-time
+      context.go('/discover');
     } on FirebaseAuthException catch (e) {
-      setState(() => _error = e.message ?? 'Authentication failed');
+      setState(() {
+        if (e.code == 'email-already-in-use') {
+          _error = 'This email is already registered. Sign in instead.';
+          _isSignUp = false;
+        } else {
+          _error = e.message ?? 'Authentication failed';
+        }
+      });
     } catch (e) {
       setState(() => _error = 'Something went wrong');
     } finally {
@@ -86,9 +121,9 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                   Text(
                     'ProfileForge',
                     style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 4),
@@ -104,8 +139,8 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                   Text(
                     _isSignUp ? 'Create an account' : 'Sign in to get started',
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 32),
@@ -127,9 +162,17 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                       hintText: 'At least 6 characters',
                       prefixIcon: const Icon(Icons.lock_outlined),
                       suffixIcon: IconButton(
-                        icon: Icon(_obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined),
-                        onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
-                        tooltip: _obscurePassword ? 'Show password' : 'Hide password',
+                        icon: Icon(
+                          _obscurePassword
+                              ? Icons.visibility_outlined
+                              : Icons.visibility_off_outlined,
+                        ),
+                        onPressed: () => setState(
+                          () => _obscurePassword = !_obscurePassword,
+                        ),
+                        tooltip: _obscurePassword
+                            ? 'Show password'
+                            : 'Hide password',
                       ),
                     ),
                     obscureText: _obscurePassword,
@@ -144,7 +187,9 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                       ),
                       child: Text(
                         _error!,
-                        style: TextStyle(color: Theme.of(context).colorScheme.onErrorContainer),
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.onErrorContainer,
+                        ),
                       ),
                     ),
                   ],
@@ -152,8 +197,47 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                   FilledButton(
                     onPressed: _loading ? null : _submit,
                     child: _loading
-                        ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
                         : Text(_isSignUp ? 'Sign up' : 'Sign in'),
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Divider(
+                          color: Theme.of(context).colorScheme.outlineVariant,
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Text(
+                          'or',
+                          style: TextStyle(
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: Divider(
+                          color: Theme.of(context).colorScheme.outlineVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  OutlinedButton.icon(
+                    onPressed: _loading ? null : _signInWithGoogle,
+                    icon: const Icon(Icons.g_mobiledata, size: 22),
+                    label: const Text('Sign in with Google'),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                    ),
                   ),
                   const SizedBox(height: 16),
                   TextButton(
@@ -165,7 +249,11 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                               _error = null;
                             });
                           },
-                    child: Text(_isSignUp ? 'Already have an account? Sign in' : "Don't have an account? Sign up"),
+                    child: Text(
+                      _isSignUp
+                          ? 'Already have an account? Sign in'
+                          : "Don't have an account? Sign up",
+                    ),
                   ),
                 ],
               ),

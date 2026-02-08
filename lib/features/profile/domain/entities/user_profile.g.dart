@@ -35,25 +35,38 @@ final userProfileSchema = CollectionSchema<UserProfile>(
   links: {},
   embeddedSchemas: {},
   estimateSize: ((UserProfile obj) => 100) as EstimateSize<UserProfile>,
-  serialize: ((UserProfile obj, IsarWriter writer) {
-    writer.writeLong(0, obj.id);
-    writer.writeString(1, obj.fullName);
-    writer.writeString(2, obj.bio);
-    writer.writeStringList(3, obj.skills);
-  }) as Serialize<UserProfile>,
-  deserialize: ((Id id, IsarReader reader) {
-    final obj = UserProfile();
-    obj.id = reader.readLong(0);
-    obj.fullName = reader.readString(1);
-    obj.bio = reader.readString(2);
-    obj.skills = reader.readStringList(3) ?? [];
-    return obj;
-  }) as Deserialize<UserProfile>,
-  deserializeProp: ((IsarReader reader, int propertyId, int offset) => null) as DeserializeProp,
+  serialize:
+      ((UserProfile obj, IsarWriter writer) {
+            writer.writeLong(0, obj.id);
+            writer.writeString(1, obj.fullName);
+            writer.writeString(2, obj.bio);
+            writer.writeStringList(3, obj.skills);
+          })
+          as Serialize<UserProfile>,
+  deserialize:
+      ((Id id, IsarReader reader) {
+            final obj = UserProfile();
+            obj.id = reader.readLong(0);
+            obj.fullName = reader.readString(1);
+            obj.bio = reader.readString(2);
+            obj.skills = reader.readStringList(3) ?? [];
+            return obj;
+          })
+          as Deserialize<UserProfile>,
+  deserializeProp:
+      ((IsarReader reader, int propertyId, int offset) => null)
+          as DeserializeProp,
   getId: (UserProfile obj) => obj.id,
   getLinks: (UserProfile obj) => <IsarLinkBase<dynamic>>[],
   version: '1',
-  attach: ((IsarCollection<UserProfile> collection, Id id, UserProfile object, bool alreadyLoaded) {}) as Attach<UserProfile>,
+  attach:
+      ((
+            IsarCollection<UserProfile> collection,
+            Id id,
+            UserProfile object,
+            bool alreadyLoaded,
+          ) {})
+          as Attach<UserProfile>,
 );
 
 // Export with the expected name (uppercase for schema constant)
@@ -62,5 +75,6 @@ final UserProfileSchema = userProfileSchema;
 
 // Stub for collection access
 extension UserProfileCollectionExtension on Isar {
-  IsarCollection<UserProfile> get userProfiles => this.collection<UserProfile>();
+  IsarCollection<UserProfile> get userProfiles =>
+      this.collection<UserProfile>();
 }

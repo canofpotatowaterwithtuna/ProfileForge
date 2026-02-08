@@ -83,7 +83,7 @@ class _PastelRainbowInputState extends State<PastelRainbowInput>
                   color: Theme.of(context).colorScheme.surface,
                   borderRadius: BorderRadius.circular(6),
                 ),
-                 child: TextField(
+                child: TextField(
                   controller: widget.controller,
                   onSubmitted: widget.onSubmitted,
                   enabled: widget.enabled,
@@ -110,7 +110,7 @@ class _PastelRainbowInputState extends State<PastelRainbowInput>
                       vertical: 14,
                     ),
                   ),
-                ),  
+                ),
               ),
             ],
           ),
@@ -135,9 +135,15 @@ class _PastelRainbowBorderPainter extends CustomPainter {
     const borderWidth = 3.0;
     const outerRadius = 9.0;
     const innerRadius = 6.0;
-    final rrect = RRect.fromRectAndRadius(rect, const Radius.circular(outerRadius));
+    final rrect = RRect.fromRectAndRadius(
+      rect,
+      const Radius.circular(outerRadius),
+    );
     final innerRect = rect.deflate(borderWidth);
-    final innerRrect = RRect.fromRectAndRadius(innerRect, const Radius.circular(innerRadius));
+    final innerRrect = RRect.fromRectAndRadius(
+      innerRect,
+      const Radius.circular(innerRadius),
+    );
 
     // 6π = 3 full rotations per cycle — fast speed, loops seamlessly (multiple of 2π)
     final sweepGradient = SweepGradient(

@@ -6,7 +6,8 @@ import '../../domain/repositories/i_profile_repository.dart';
 
 /// In-memory mock implementation for tests and overrides.
 class ProfileRepositoryMockImpl implements IProfileRepository {
-  ProfileRepositoryMockImpl({UserProfile? initial}) : _profile = initial ?? const UserProfile();
+  ProfileRepositoryMockImpl({UserProfile? initial})
+    : _profile = initial ?? const UserProfile();
 
   UserProfile _profile;
 

@@ -60,7 +60,10 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
       if (searchable.contains(lowerQuery)) {
         matches.add(p);
       } else {
-        final words = lowerQuery.split(RegExp(r'\s+')).where((w) => w.isNotEmpty).toList();
+        final words = lowerQuery
+            .split(RegExp(r'\s+'))
+            .where((w) => w.isNotEmpty)
+            .toList();
         final score = words.where((w) => searchable.contains(w)).length;
         if (score > 0) matches.add(p);
       }
@@ -68,11 +71,16 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
     matches.sort((a, b) {
       final aName = a.profile.fullName.toLowerCase();
       final bName = b.profile.fullName.toLowerCase();
-      if (aName.startsWith(lowerQuery) && !bName.startsWith(lowerQuery)) return -1;
-      if (!aName.startsWith(lowerQuery) && bName.startsWith(lowerQuery)) return 1;
+      if (aName.startsWith(lowerQuery) && !bName.startsWith(lowerQuery))
+        return -1;
+      if (!aName.startsWith(lowerQuery) && bName.startsWith(lowerQuery))
+        return 1;
       final aText = '${a.profile.fullName} ${a.profile.headline}'.toLowerCase();
       final bText = '${b.profile.fullName} ${b.profile.headline}'.toLowerCase();
-      final words = lowerQuery.split(RegExp(r'\s+')).where((w) => w.isNotEmpty).toList();
+      final words = lowerQuery
+          .split(RegExp(r'\s+'))
+          .where((w) => w.isNotEmpty)
+          .toList();
       final aScore = words.where((w) => aText.contains(w)).length;
       final bScore = words.where((w) => bText.contains(w)).length;
       return bScore.compareTo(aScore);
@@ -84,7 +92,9 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
     final isLoggedIn = FirebaseAuth.instance.currentUser != null;
     showModalBottomSheet<void>(
       context: context,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
       builder: (ctx) => SafeArea(
         child: SingleChildScrollView(
           child: Padding(
@@ -93,25 +103,100 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-              Center(child: Container(width: 40, height: 4, decoration: BoxDecoration(color: Theme.of(ctx).colorScheme.outline.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(2)))),
-              const SizedBox(height: 24),
-              Text('Menu', style: Theme.of(ctx).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
-              const SizedBox(height: 16),
-              ListTile(
-                leading: Container(padding: const EdgeInsets.all(10), decoration: BoxDecoration(color: Theme.of(ctx).colorScheme.primaryContainer.withValues(alpha: 0.6), borderRadius: BorderRadius.circular(12)), child: Icon(Icons.explore_outlined, size: 22, color: Theme.of(ctx).colorScheme.onPrimaryContainer)),
-                title: const Text('Explore', style: TextStyle(fontWeight: FontWeight.w600)),
-                subtitle: Text('Browse portfolios', style: Theme.of(ctx).textTheme.bodySmall?.copyWith(color: Theme.of(ctx).colorScheme.onSurfaceVariant)),
-                onTap: () { Navigator.pop(ctx); context.push('/explore'); },
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              ),
-              ListTile(
-                leading: Container(padding: const EdgeInsets.all(10), decoration: BoxDecoration(color: Theme.of(ctx).colorScheme.primaryContainer.withValues(alpha: 0.6), borderRadius: BorderRadius.circular(12)), child: Icon(isLoggedIn ? Icons.logout : Icons.login, size: 22, color: Theme.of(ctx).colorScheme.onPrimaryContainer)),
-                title: Text(isLoggedIn ? 'Sign out' : 'Sign in', style: const TextStyle(fontWeight: FontWeight.w600)),
-                subtitle: Text(isLoggedIn ? 'Sign out of your account' : 'Sign in to send hire requests', style: Theme.of(ctx).textTheme.bodySmall?.copyWith(color: Theme.of(ctx).colorScheme.onSurfaceVariant)),
-                onTap: () { Navigator.pop(ctx); if (isLoggedIn) { FirebaseAuth.instance.signOut(); context.go('/auth'); } else { context.push('/auth'); } },
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              ),
-            ],
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: Theme.of(
+                        ctx,
+                      ).colorScheme.outline.withValues(alpha: 0.3),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                Text(
+                  'Menu',
+                  style: Theme.of(
+                    ctx,
+                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 16),
+                ListTile(
+                  leading: Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: Theme.of(
+                        ctx,
+                      ).colorScheme.primaryContainer.withValues(alpha: 0.6),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(
+                      Icons.explore_outlined,
+                      size: 22,
+                      color: Theme.of(ctx).colorScheme.onPrimaryContainer,
+                    ),
+                  ),
+                  title: const Text(
+                    'Explore',
+                    style: TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                  subtitle: Text(
+                    'Browse portfolios',
+                    style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(ctx).colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  onTap: () {
+                    Navigator.pop(ctx);
+                    context.push('/explore');
+                  },
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                ListTile(
+                  leading: Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: Theme.of(
+                        ctx,
+                      ).colorScheme.primaryContainer.withValues(alpha: 0.6),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(
+                      isLoggedIn ? Icons.logout : Icons.login,
+                      size: 22,
+                      color: Theme.of(ctx).colorScheme.onPrimaryContainer,
+                    ),
+                  ),
+                  title: Text(
+                    isLoggedIn ? 'Sign out' : 'Sign in',
+                    style: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                  subtitle: Text(
+                    isLoggedIn
+                        ? 'Sign out of your account'
+                        : 'Sign in to send hire requests',
+                    style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(ctx).colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  onTap: () {
+                    Navigator.pop(ctx);
+                    if (isLoggedIn) {
+                      FirebaseAuth.instance.signOut();
+                      context.go('/auth');
+                    } else {
+                      context.push('/auth');
+                    }
+                  },
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ],
             ),
           ),
         ),
@@ -130,7 +215,8 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
       final list = portfolios.docs.map((d) {
         final data = d.data();
         final profile = ProfileFirestoreDto.fromMap(data);
-        return PublicPortfolio(userId: d.id, profile: profile);
+        final userId = (data['userId'] as String?) ?? d.id;
+        return PublicPortfolio(userId: userId, profile: profile);
       }).toList();
       if (!mounted) return;
       final keyword = _queryController.text.trim();
@@ -165,6 +251,10 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
     final query = _queryController.text.trim();
     if (query.isEmpty) {
       setState(() => _error = 'Describe who you\'re looking for');
+      return;
+    }
+    if (FirebaseAuth.instance.currentUser == null) {
+      setState(() => _error = 'Sign in to use AI search');
       return;
     }
     if (_allPortfolios.isEmpty) await _loadPortfolios();
@@ -221,37 +311,54 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
               children: [
                 Text(
                   'Find the right people',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   'Search by name or describe who you need',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
                 ),
                 const SizedBox(height: 16),
-                if (_aiMode) PastelRainbowInput(
-                        controller: _queryController,
-                        hintText: 'Describe your ideal candidate...',
-                        prefixIcon: Icon(Icons.auto_awesome, size: 20, color: Theme.of(context).colorScheme.primary),
-                        onSubmitted: (_) => _runAiSearch(),
-                      ) else TextField(
-                        controller: _queryController,
-                        decoration: InputDecoration(
-                          hintText: 'Name, skills, company...',
-                          prefixIcon: const Icon(Icons.search),
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(7)),
-                          filled: true,
-                        ),
-                        onSubmitted: (_) => _runKeywordSearch(),
-                        onChanged: (_) => _runKeywordSearch(),
+                if (_aiMode)
+                  PastelRainbowInput(
+                    controller: _queryController,
+                    hintText: 'Describe your ideal candidate...',
+                    prefixIcon: Icon(
+                      Icons.auto_awesome,
+                      size: 20,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                    onSubmitted: (_) => _runAiSearch(),
+                  )
+                else
+                  TextField(
+                    controller: _queryController,
+                    decoration: InputDecoration(
+                      hintText: 'Name, skills, company...',
+                      prefixIcon: const Icon(Icons.search),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(7),
                       ),
+                      filled: true,
+                    ),
+                    onSubmitted: (_) => _runKeywordSearch(),
+                    onChanged: (_) => _runKeywordSearch(),
+                  ),
                 const SizedBox(height: 12),
                 Row(
                   children: [
                     FilterChip(
                       selected: !_aiMode,
                       label: const Text('Keyword'),
-                      avatar: const Icon(Icons.search, size: 18, color: Colors.grey),
+                      avatar: const Icon(
+                        Icons.search,
+                        size: 18,
+                        color: Colors.grey,
+                      ),
                       onSelected: (v) => setState(() {
                         _aiMode = false;
                         _runKeywordSearch();
@@ -260,28 +367,60 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
                     const SizedBox(width: 8),
                     FilterChip(
                       selected: _aiMode,
-                      label: _aiLoading ? const Text('Searching...') : const Text('AI'),
+                      label: _aiLoading
+                          ? const Text('Searching...')
+                          : const Text('AI'),
                       avatar: _aiLoading
-                          ? SizedBox(width: 18, height: 18, child: AiSearchLoader(size: 18))
-                          : Icon(Icons.auto_awesome, size: 18, color: _aiMode ? Theme.of(context).colorScheme.onPrimary : Theme.of(context).colorScheme.primary),
-                      onSelected: _aiLoading ? null : (v) => setState(() {
-                        _aiMode = true;
-                        if (_queryController.text.trim().isNotEmpty) _runAiSearch();
-                      }),
+                          ? SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: AiSearchLoader(size: 18),
+                            )
+                          : Icon(
+                              Icons.auto_awesome,
+                              size: 18,
+                              color: _aiMode
+                                  ? Theme.of(context).colorScheme.onPrimary
+                                  : Theme.of(context).colorScheme.primary,
+                            ),
+                      onSelected: _aiLoading
+                          ? null
+                          : (v) => setState(() {
+                              _aiMode = true;
+                              _error = FirebaseAuth.instance.currentUser == null
+                                  ? 'Sign in to use AI search'
+                                  : null;
+                              if (_queryController.text.trim().isNotEmpty)
+                                _runAiSearch();
+                            }),
                     ),
                   ],
                 ),
                 if (_error != null) ...[
                   const SizedBox(height: 12),
-                  Text(_error!, style: TextStyle(color: Theme.of(context).colorScheme.error)),
+                  Text(
+                    _error!,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.error,
+                    ),
+                  ),
                 ],
                 if (_usedAiSearch && _results.isNotEmpty) ...[
                   const SizedBox(height: 8),
                   Row(
                     children: [
-                      Icon(Icons.auto_awesome, size: 14, color: Theme.of(context).colorScheme.primary),
+                      Icon(
+                        Icons.auto_awesome,
+                        size: 14,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
                       const SizedBox(width: 6),
-                      Text('AI matched ${_results.length} candidates', style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.primary)),
+                      Text(
+                        'AI matched ${_results.length} candidates',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                      ),
                     ],
                   ),
                 ],
@@ -302,12 +441,18 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
                         const SizedBox(height: 24),
                         Text(
                           'AI is finding matching candidates...',
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w500),
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(fontWeight: FontWeight.w500),
                         ),
                         const SizedBox(height: 8),
                         Text(
                           'Understanding your description',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
+                              ),
                         ),
                       ],
                     ),
@@ -332,8 +477,8 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
                           _usedAiSearch
                               ? 'Try a different search or browse Explore'
                               : _queryController.text.trim().isEmpty
-                                  ? 'No published portfolios yet. Browse Explore.'
-                                  : 'No matches for "${_queryController.text.trim()}". Try different keywords',
+                              ? 'No published portfolios yet. Browse Explore.'
+                              : 'No matches for "${_queryController.text.trim()}". Try different keywords',
                           style: Theme.of(context).textTheme.bodyMedium
                               ?.copyWith(
                                 color: Theme.of(

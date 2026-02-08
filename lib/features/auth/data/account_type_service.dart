@@ -10,12 +10,16 @@ class AccountTypeService {
 
   static const _users = 'users';
 
-  Future<void> setAccountType({required String accountType, String? companyName}) async {
+  Future<void> setAccountType({
+    required String accountType,
+    String? companyName,
+  }) async {
     final uid = _auth.currentUser?.uid;
     if (uid == null) throw StateError('Not authenticated');
     await _firestore.collection(_users).doc(uid).set({
       'accountType': accountType,
-      if (companyName != null && companyName.isNotEmpty) 'companyName': companyName,
+      if (companyName != null && companyName.isNotEmpty)
+        'companyName': companyName,
       'updatedAt': FieldValue.serverTimestamp(),
     }, SetOptions(merge: true));
   }
@@ -30,6 +34,10 @@ class AccountTypeService {
   Stream<String?> streamAccountType() {
     final uid = _auth.currentUser?.uid;
     if (uid == null) return Stream.value(null);
-    return _firestore.collection(_users).doc(uid).snapshots().map((doc) => doc.data()?['accountType'] as String?);
+    return _firestore
+        .collection(_users)
+        .doc(uid)
+        .snapshots()
+        .map((doc) => doc.data()?['accountType'] as String?);
   }
 }

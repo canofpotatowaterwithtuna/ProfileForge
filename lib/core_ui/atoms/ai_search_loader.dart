@@ -76,7 +76,11 @@ class _AiSearchLoaderState extends State<AiSearchLoader>
 }
 
 class _RainbowSpinnerPainter extends CustomPainter {
-  _RainbowSpinnerPainter({required this.progress, required this.colors, this.strokeWidth = 4});
+  _RainbowSpinnerPainter({
+    required this.progress,
+    required this.colors,
+    this.strokeWidth = 4,
+  });
 
   final double progress;
   final List<Color> colors;

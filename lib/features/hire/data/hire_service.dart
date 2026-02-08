@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-/// Sends hire requests. Recipients see them in-app (no email - works on Firebase Spark plan).
+/// Sends hire requests. Recipients see them in-app with contact info to manage externally.
 class HireService {
   HireService(this._firestore, this._auth);
 
@@ -10,7 +10,7 @@ class HireService {
 
   static const _hireRequests = 'hireRequests';
 
-  /// Send a hire request. Recipient sees it in Hire requests screen.
+  /// Send a hire request. Recipient sees it in Hire requests screen with contact info.
   Future<void> sendHireRequest({
     required String toUserId,
     required String recipientEmail,
@@ -34,7 +34,8 @@ class HireService {
     });
   }
 
-  /// Stream hire requests for the current user (as recipient).
+  /// Stream hire requests received by the current user.
+  /// Uses simple where (no composite index needed). Sorts by createdAt in memory.
   Stream<List<HireRequest>> streamHireRequests() {
     final uid = _auth.currentUser?.uid;
     if (uid == null) return Stream.value([]);
@@ -42,9 +43,16 @@ class HireService {
     return _firestore
         .collection(_hireRequests)
         .where('toUserId', isEqualTo: uid)
-        .orderBy('createdAt', descending: true)
         .snapshots()
-        .map((snap) => snap.docs.map((d) => _toRequest(d)).toList());
+        .map((snap) {
+          final list = snap.docs.map((d) => _toRequest(d)).toList();
+          list.sort((a, b) {
+            final aAt = a.createdAt ?? DateTime(0);
+            final bAt = b.createdAt ?? DateTime(0);
+            return bAt.compareTo(aAt); // newest first
+          });
+          return list;
+        });
   }
 }
 
@@ -52,7 +60,6 @@ HireRequest _toRequest(DocumentSnapshot doc) {
   final m = doc.data() as Map<String, dynamic>? ?? {};
   return HireRequest(
     id: doc.id,
-    fromUserId: m['fromUserId'] as String? ?? '',
     fromName: m['fromName'] as String? ?? '',
     fromCompany: m['fromCompany'] as String? ?? '',
     message: m['message'] as String? ?? '',
@@ -64,7 +71,6 @@ HireRequest _toRequest(DocumentSnapshot doc) {
 class HireRequest {
   const HireRequest({
     required this.id,
-    required this.fromUserId,
     required this.fromName,
     required this.fromCompany,
     required this.message,
@@ -72,7 +78,6 @@ class HireRequest {
     this.createdAt,
   });
   final String id;
-  final String fromUserId;
   final String fromName;
   final String fromCompany;
   final String message;
