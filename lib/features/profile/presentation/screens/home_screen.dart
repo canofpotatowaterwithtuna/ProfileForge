@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/di/firebase_providers.dart';
+import '../../../../core_ui/atoms/link_favicon.dart';
 import '../../../../core_ui/atoms/profile_strength_meter.dart';
 import '../../../../core_ui/atoms/shimmer_loading.dart';
 import '../../domain/models/profile_model.dart';
@@ -45,9 +46,81 @@ class HomeScreen extends ConsumerWidget {
         data: (profile) => _PortfolioScaffold(
           profile: profile,
           isLoggedIn: isLoggedIn,
+          ref: ref,
           onEdit: () => openEdit(profile),
           onShare: () => shareProfile(profile),
-          onPublish: isLoggedIn ? () => _publish(context, ref, profile) : null,
+          onPublish: isLoggedIn ? () => _publish(context, ref, profile, ref.read(isPublishedProvider).value ?? false) : null,
+        ),
+      ),
+    );
+  }
+}
+
+void _showActionsSheet(
+  BuildContext context,
+  WidgetRef ref, {
+  required VoidCallback onEdit,
+  required VoidCallback onShare,
+  required VoidCallback? onPublish,
+  required bool isLoggedIn,
+  required bool isEmpty,
+}) {
+  showModalBottomSheet<void>(
+    context: context,
+    shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+    builder: (ctx) => SafeArea(
+      child: Consumer(
+        builder: (ctx, ref, _) {
+          final isPublished = ref.watch(isPublishedProvider).value ?? false;
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Center(child: Container(width: 36, height: 4, decoration: BoxDecoration(color: Theme.of(ctx).colorScheme.outline.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(2)))),
+                const SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    _CompactAction(icon: Icons.explore_outlined, label: 'Explore', onTap: () { Navigator.pop(ctx); context.push('/explore'); }),
+                    _CompactAction(icon: Icons.search, label: 'Discover', onTap: () { Navigator.pop(ctx); context.push('/discover'); }),
+                    _CompactAction(icon: Icons.share_outlined, label: 'Share', onTap: !isEmpty ? () { Navigator.pop(ctx); onShare(); } : null),
+                    _CompactAction(icon: Icons.cloud_upload_outlined, label: isPublished ? 'Update' : 'Publish', onTap: onPublish != null ? () { Navigator.pop(ctx); onPublish(); } : null),
+                  ],
+                ),
+                const Divider(height: 24),
+                ListTile(leading: Icon(Icons.handshake_outlined, size: 22, color: Theme.of(ctx).colorScheme.primary), title: const Text('Hire requests'), dense: true, onTap: () { Navigator.pop(ctx); context.push('/hire-requests'); }),
+                ListTile(leading: Icon(isLoggedIn ? Icons.logout : Icons.login, size: 22, color: Theme.of(ctx).colorScheme.primary), title: Text(isLoggedIn ? 'Sign out' : 'Sign in'), dense: true, onTap: () { Navigator.pop(ctx); isLoggedIn ? _signOut(context) : context.push('/auth'); }),
+              ],
+            ),
+          );
+        },
+      ),
+    ),
+  );
+}
+
+class _CompactAction extends StatelessWidget {
+  const _CompactAction({required this.icon, required this.label, this.onTap});
+  final IconData icon;
+  final String label;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 28, color: onTap != null ? colorScheme.primary : colorScheme.onSurface.withValues(alpha: 0.4)),
+            const SizedBox(height: 6),
+            Text(label, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: onTap != null ? colorScheme.onSurface : colorScheme.onSurface.withValues(alpha: 0.4))),
+          ],
         ),
       ),
     );
@@ -59,24 +132,29 @@ void _signOut(BuildContext context) async {
   if (context.mounted) context.go('/auth');
 }
 
-Future<void> _publish(BuildContext context, WidgetRef ref, UserProfile profile) async {
+Future<void> _publish(BuildContext context, WidgetRef ref, UserProfile profile, bool wasAlreadyPublished) async {
   try {
     await ref.read(portfolioFirestoreProvider).publish(profile);
+    ref.invalidate(isPublishedProvider);
     if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Portfolio published online'), behavior: SnackBarBehavior.floating));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(wasAlreadyPublished ? 'Portfolio updated' : 'Portfolio published online'),
+        behavior: SnackBarBehavior.floating,
+      ));
     }
   } catch (e) {
     if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to publish: $e'), behavior: SnackBarBehavior.floating, backgroundColor: Colors.red));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed: $e'), behavior: SnackBarBehavior.floating, backgroundColor: Colors.red));
     }
   }
 }
 
 class _PortfolioScaffold extends StatelessWidget {
-  const _PortfolioScaffold({required this.profile, required this.isLoggedIn, required this.onEdit, required this.onShare, this.onPublish});
+  const _PortfolioScaffold({required this.profile, required this.isLoggedIn, required this.ref, required this.onEdit, required this.onShare, this.onPublish});
 
   final UserProfile profile;
   final bool isLoggedIn;
+  final WidgetRef ref;
   final VoidCallback onEdit;
   final VoidCallback onShare;
   final VoidCallback? onPublish;
@@ -96,15 +174,10 @@ class _PortfolioScaffold extends StatelessWidget {
       appBar: AppBar(
         title: const Text('ProfileForge'),
         actions: [
-          IconButton(icon: const Icon(Icons.explore_outlined), onPressed: () => context.push('/explore'), tooltip: 'Explore'),
-          IconButton(icon: const Icon(Icons.search), onPressed: () => context.push('/discover'), tooltip: 'Discover'),
-          IconButton(icon: const Icon(Icons.cloud_upload_outlined), onPressed: onPublish, tooltip: 'Publish online'),
-          IconButton(icon: const Icon(Icons.share_outlined), onPressed: _isEmpty ? null : onShare, tooltip: 'Share portfolio'),
-          IconButton(icon: const Icon(Icons.edit_outlined), onPressed: onEdit, tooltip: 'Edit portfolio'),
           IconButton(
-            icon: Icon(isLoggedIn ? Icons.logout : Icons.login),
-            onPressed: () => isLoggedIn ? _signOut(context) : context.push('/auth'),
-            tooltip: isLoggedIn ? 'Sign out' : 'Sign in',
+            icon: const Icon(Icons.menu_rounded),
+            onPressed: () => _showActionsSheet(context, ref, onEdit: onEdit, onShare: onShare, onPublish: onPublish, isLoggedIn: isLoggedIn, isEmpty: _isEmpty),
+            tooltip: 'Menu',
           ),
         ],
       ),
@@ -384,9 +457,9 @@ class _LinkTile extends StatelessWidget {
           child: Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(10),
+                padding: const EdgeInsets.all(6),
                 decoration: BoxDecoration(color: colorScheme.primary.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(12)),
-                child: Icon(Icons.link, size: 20, color: colorScheme.primary),
+                child: Center(child: LinkFavicon(url: link.url, size: 28, fallbackColor: colorScheme.primary)),
               ),
               const SizedBox(width: 14),
               Expanded(
@@ -479,7 +552,7 @@ class _EmptyState extends StatelessWidget {
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  'Add your name, headline, bio, skills, experience, and links. Stand out.',
+                  'Add your name, headline, skills, and experience—then publish to get discovered.',
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: Colors.white.withValues(alpha: 0.9)),
                   textAlign: TextAlign.center,
                 ),

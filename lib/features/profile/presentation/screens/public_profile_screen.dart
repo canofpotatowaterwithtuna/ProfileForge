@@ -1,30 +1,48 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../../../profile/data/profile_firestore_dto.dart';
+import '../../../../core/di/firebase_providers.dart';
+import '../../../../core_ui/atoms/link_favicon.dart';
+import '../../data/portfolio_firestore_service.dart';
 import '../../domain/models/profile_model.dart';
-import '../../../../core_ui/atoms/profile_strength_meter.dart';
-import '../../domain/profile_strength.dart';
+import '../../../hire/presentation/widgets/hire_request_dialog.dart';
 
 /// Read-only view of another user's portfolio.
-class PublicProfileScreen extends StatelessWidget {
+class PublicProfileScreen extends ConsumerWidget {
   const PublicProfileScreen({super.key, required this.userId});
 
   final String userId;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final currentUid = FirebaseAuth.instance.currentUser?.uid;
+    final canHire = currentUid != null && currentUid != userId;
+
     return Scaffold(
       appBar: AppBar(title: const Text('Portfolio')),
-      body: FutureBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-        future: FirebaseFirestore.instance.collection('portfolios').doc(userId).get(),
+      body: FutureBuilder<PublicPortfolio?>(
+        future: ref.read(portfolioFirestoreProvider).getPortfolio(userId),
         builder: (context, snap) {
           if (snap.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (snap.hasError) {
             return Center(
-              child: CircularProgressIndicator(color: Theme.of(context).colorScheme.primary),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.error_outline, size: 48, color: Theme.of(context).colorScheme.error),
+                  const SizedBox(height: 16),
+                  Text('Failed to load', style: Theme.of(context).textTheme.titleMedium),
+                  const SizedBox(height: 8),
+                  Text(snap.error.toString(), textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodySmall),
+                ],
+              ),
             );
           }
-          if (snap.hasError || !snap.hasData || !snap.data!.exists) {
+          final portfolio = snap.data;
+          if (portfolio == null) {
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -33,124 +51,124 @@ class PublicProfileScreen extends StatelessWidget {
                   const SizedBox(height: 24),
                   Text('Portfolio not found', style: Theme.of(context).textTheme.titleLarge),
                   const SizedBox(height: 8),
-                  Text('This user may have unpublished their portfolio', style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+                  Text('This portfolio may be private or unavailable.', style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
                 ],
               ),
             );
           }
-          final data = snap.data!.data() ?? {};
-          if (data['published'] != true) {
-            return Center(
-              child: Text('This portfolio is private', style: Theme.of(context).textTheme.titleMedium),
-            );
-          }
-          final profile = ProfileFirestoreDto.fromMap(data);
-          return _ProfileBody(profile: profile);
+          final profile = portfolio.profile;
+          final isDark = Theme.of(context).brightness == Brightness.dark;
+
+          return CustomScrollView(
+            slivers: [
+              SliverToBoxAdapter(
+                child: _HeroSection(
+                  fullName: profile.fullName,
+                  headline: profile.headline,
+                  isDark: isDark,
+                ),
+              ),
+              if (canHire)
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                    child: FilledButton.icon(
+                      onPressed: () => HireRequestDialog.show(
+                        context,
+                        toUserId: userId,
+                        recipientEmail: profile.email,
+                        recipientName: profile.fullName,
+                      ),
+                      icon: const Icon(Icons.handshake_outlined),
+                      label: const Text('Send hire request'),
+                    ),
+                  ),
+                ),
+              SliverToBoxAdapter(child: SizedBox(height: 24)),
+              SliverPadding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                sliver: SliverList(
+                  delegate: SliverChildListDelegate([
+                    if (profile.bio.isNotEmpty || profile.email.isNotEmpty) ...[
+                      _CardSection(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            if (profile.bio.isNotEmpty)
+                              Text(
+                                profile.bio,
+                                style: Theme.of(context).textTheme.bodyLarge?.copyWith(height: 1.5, color: Theme.of(context).colorScheme.onSurface),
+                              ),
+                            if (profile.bio.isNotEmpty && profile.email.isNotEmpty) const SizedBox(height: 16),
+                            if (profile.email.isNotEmpty) _EmailChip(email: profile.email),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                    ],
+                    if (profile.skills.isNotEmpty) ...[
+                      _SectionTitle(title: 'Skills'),
+                      const SizedBox(height: 10),
+                      Wrap(
+                        spacing: 10,
+                        runSpacing: 10,
+                        children: profile.skills
+                            .map((s) => Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                                  decoration: BoxDecoration(
+                                    color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: isDark ? 0.4 : 0.6),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Text(s.name, style: TextStyle(fontWeight: FontWeight.w500, color: Theme.of(context).colorScheme.onPrimaryContainer)),
+                                ))
+                            .toList(),
+                      ),
+                      const SizedBox(height: 24),
+                    ],
+                    if (profile.experience.isNotEmpty) ...[
+                      _SectionTitle(title: 'Experience'),
+                      const SizedBox(height: 10),
+                      ...profile.experience.map(
+                        (e) => Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: _CardSection(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(e.role, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600)),
+                                if (e.company.isNotEmpty) Text(e.company, style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.primary)),
+                                if (e.period.isNotEmpty) Text(e.period, style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+                                if (e.description.isNotEmpty) ...[const SizedBox(height: 8), Text(e.description, style: Theme.of(context).textTheme.bodyMedium?.copyWith(height: 1.4))],
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                    ],
+                    if (profile.links.isNotEmpty) ...[
+                      _SectionTitle(title: 'Links'),
+                      const SizedBox(height: 10),
+                      ...profile.links.map((l) => Padding(padding: const EdgeInsets.only(bottom: 8), child: _LinkTile(link: l))),
+                    ],
+                    const SizedBox(height: 100),
+                  ]),
+                ),
+              ),
+            ],
+          );
         },
       ),
     );
   }
 }
 
-class _ProfileBody extends StatelessWidget {
-  const _ProfileBody({required this.profile});
-
-  final UserProfile profile;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    return CustomScrollView(
-      slivers: [
-        SliverToBoxAdapter(
-          child: _HeroSection(
-            fullName: profile.fullName,
-            headline: profile.headline,
-            isDark: isDark,
-            strength: profileStrength(profile),
-          ),
-        ),
-        const SliverToBoxAdapter(child: SizedBox(height: 24)),
-        SliverPadding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          sliver: SliverList(
-            delegate: SliverChildListDelegate([
-              if (profile.bio.isNotEmpty || profile.email.isNotEmpty) ...[
-                _CardSection(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      if (profile.bio.isNotEmpty) Text(profile.bio, style: Theme.of(context).textTheme.bodyLarge?.copyWith(height: 1.5, color: colorScheme.onSurface)),
-                      if (profile.bio.isNotEmpty && profile.email.isNotEmpty) const SizedBox(height: 16),
-                      if (profile.email.isNotEmpty) _EmailChip(email: profile.email),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 16),
-              ],
-              if (profile.skills.isNotEmpty) ...[
-                _SectionTitle(title: 'Skills'),
-                const SizedBox(height: 10),
-                Wrap(
-                  spacing: 10,
-                  runSpacing: 10,
-                  children: profile.skills
-                      .map((s) => Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                            decoration: BoxDecoration(
-                              color: colorScheme.primaryContainer.withValues(alpha: isDark ? 0.4 : 0.6),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Text(s.name, style: TextStyle(fontWeight: FontWeight.w500, color: colorScheme.onPrimaryContainer)),
-                          ))
-                      .toList(),
-                ),
-                const SizedBox(height: 24),
-              ],
-              if (profile.experience.isNotEmpty) ...[
-                _SectionTitle(title: 'Experience'),
-                const SizedBox(height: 10),
-                ...profile.experience.map(
-                  (e) => Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: _CardSection(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(e.role, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600)),
-                          if (e.company.isNotEmpty) Text(e.company, style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: colorScheme.primary)),
-                          if (e.period.isNotEmpty) Text(e.period, style: Theme.of(context).textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant)),
-                          if (e.description.isNotEmpty) ...[const SizedBox(height: 8), Text(e.description, style: Theme.of(context).textTheme.bodyMedium?.copyWith(height: 1.4))],
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 24),
-              ],
-              if (profile.links.isNotEmpty) ...[
-                _SectionTitle(title: 'Links'),
-                const SizedBox(height: 10),
-                ...profile.links.map((l) => Padding(padding: const EdgeInsets.only(bottom: 8), child: _LinkTile(link: l))),
-              ],
-              const SizedBox(height: 100),
-            ]),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
 class _HeroSection extends StatelessWidget {
-  const _HeroSection({required this.fullName, required this.headline, required this.isDark, this.strength = 0});
+  const _HeroSection({required this.fullName, required this.headline, required this.isDark});
 
   final String fullName;
   final String headline;
   final bool isDark;
-  final double strength;
 
   @override
   Widget build(BuildContext context) {
@@ -189,11 +207,11 @@ class _HeroSection extends StatelessWidget {
           ),
           if (headline.isNotEmpty) ...[
             const SizedBox(height: 8),
-            Text(headline, style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: Colors.white.withValues(alpha: 0.9)), textAlign: TextAlign.center),
-          ],
-          if (strength > 0) ...[
-            const SizedBox(height: 16),
-            ProfileStrengthMeter(strength: strength, size: 44, strokeWidth: 4, backgroundColor: Colors.white.withValues(alpha: 0.3), foregroundColor: Colors.white),
+            Text(
+              headline,
+              style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: Colors.white.withValues(alpha: 0.9)),
+              textAlign: TextAlign.center,
+            ),
           ],
         ],
       ),
@@ -203,6 +221,7 @@ class _HeroSection extends StatelessWidget {
 
 class _CardSection extends StatelessWidget {
   const _CardSection({required this.child});
+
   final Widget child;
 
   @override
@@ -223,16 +242,25 @@ class _CardSection extends StatelessWidget {
 
 class _SectionTitle extends StatelessWidget {
   const _SectionTitle({required this.title});
+
   final String title;
 
   @override
   Widget build(BuildContext context) {
-    return Text(title, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700, color: Theme.of(context).colorScheme.primary, letterSpacing: 0.2));
+    return Text(
+      title,
+      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.w700,
+            color: Theme.of(context).colorScheme.primary,
+            letterSpacing: 0.2,
+          ),
+    );
   }
 }
 
 class _EmailChip extends StatelessWidget {
   const _EmailChip({required this.email});
+
   final String email;
 
   Future<void> _openMail(BuildContext context) async {
@@ -262,6 +290,7 @@ class _EmailChip extends StatelessWidget {
 
 class _LinkTile extends StatelessWidget {
   const _LinkTile({required this.link});
+
   final ProfileLink link;
 
   Future<void> _openUrl(BuildContext context) async {
@@ -285,9 +314,9 @@ class _LinkTile extends StatelessWidget {
           child: Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(10),
+                padding: const EdgeInsets.all(6),
                 decoration: BoxDecoration(color: colorScheme.primary.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(12)),
-                child: Icon(Icons.link, size: 20, color: colorScheme.primary),
+                child: Center(child: LinkFavicon(url: link.url, size: 28, fallbackColor: colorScheme.primary)),
               ),
               const SizedBox(width: 14),
               Expanded(
@@ -295,7 +324,8 @@ class _LinkTile extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(link.title.isEmpty ? link.url : link.title, style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600)),
-                    if (link.title.isNotEmpty && link.url != link.title) Text(link.url, style: Theme.of(context).textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant), maxLines: 1, overflow: TextOverflow.ellipsis),
+                    if (link.title.isNotEmpty && link.url != link.title)
+                      Text(link.url, style: Theme.of(context).textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant), maxLines: 1, overflow: TextOverflow.ellipsis),
                   ],
                 ),
               ),
